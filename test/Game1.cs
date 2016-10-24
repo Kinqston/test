@@ -2,6 +2,7 @@ using Android.Widget;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Input.Touch;
 using System;
 
 namespace test
@@ -28,10 +29,12 @@ namespace test
         private int ScreenHeigth;
         private Vector2 velocity;
         int score;
+        int need_score;
         MouseState prevmousestate;
         Boolean fail = false;
         public Game1()
         {
+            need_score = 25;
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             var metric = new Android.Util.DisplayMetrics();
@@ -66,6 +69,7 @@ namespace test
             spriteBatch = new SpriteBatch(GraphicsDevice);
             ScreenWidth = GraphicsDevice.Viewport.Width;
             ScreenHeigth = GraphicsDevice.Viewport.Height;
+
             ballTexture2D = Content.Load<Texture2D>("ball");
             ballRectangle = new Rectangle(20,20,50,50);
 
@@ -76,8 +80,8 @@ namespace test
             winRectangle = new Rectangle(0, 0, ScreenWidth, ScreenHeigth);
 
 
-            velocity.Y = 5f;
-            velocity.X = 5f;
+            velocity.Y = 10f;
+            velocity.X = 10f;
 
 
             lineTexture2D = Content.Load<Texture2D>("line");
@@ -103,7 +107,7 @@ namespace test
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 Exit();
-            if (fail == false && score<5)
+            if (fail == false && score<need_score)
             {
                 ballRectangle.X = ballRectangle.X + Convert.ToInt32(velocity.X);
                 ballRectangle.Y = ballRectangle.Y + Convert.ToInt32(velocity.Y);
@@ -135,19 +139,36 @@ namespace test
                     velocity.Y = -velocity.Y;
                     score++;
                 }
-            }
+                /*  MouseState mousestate = Mouse.GetState();
+                  Console.WriteLine();
+                  if (mousestate.X != prevmousestate.X || mousestate.Y != prevmousestate.Y)
+                  {
+                      Console.WriteLine(mousestate.X);
+                      // starposition = new Vector2(mousestate.X, mousestate.Y);
+                       prevmousestate = mousestate;
+                  }*/
+                /*  if(TouchPanel.IsGestureAvailable)
+                   {
+                       GestureSample gesture = TouchPanel.ReadGesture();
+                     //  if(gesture.GestureType == GestureType.Flick)
+                    //   {
+                           Console.WriteLine(gesture.Delta);
+                    //   }
+                   }*/
+                TouchCollection touchCollection = TouchPanel.GetState();
+                foreach (TouchLocation tl in touchCollection)
+                {
+                    if ((tl.State == TouchLocationState.Pressed) || (tl.State == TouchLocationState.Moved))
+                    {
+                       
+                        // add sparkles based on the touch location
+                         lineRectangle.X = (int)tl.Position.X - lineRectangle.Width/2;
 
-          /*  MouseState mousestate = Mouse.GetState();
-            if (mousestate.X != prevmousestate.X || mousestate.Y != prevmousestate.Y)
-            {
-                Console.WriteLine(mousestate.X);
-                starposition = new Vector2(mousestate.X, mousestate.Y);
-                prevmousestate = mousestate;
-            }*/
-            
+                    }
+                }
+            }             
             base.Update(gameTime);
         }
-
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
@@ -156,14 +177,14 @@ namespace test
         {
             GraphicsDevice.Clear(Color.Coral);
             spriteBatch.Begin();
-            if(score<5 && fail == false)
+            if(score<need_score && fail == false)
             {
                 spriteBatch.Draw(ballTexture2D, ballRectangle, Color.White);
                 spriteBatch.Draw(lineTexture2D, lineRectangle, Color.White);
             }
             else
             {
-                if(score == 5)
+                if(score == need_score)
                 {
                     spriteBatch.Draw(winTexture2D, loseRectangle, Color.White);
                 }

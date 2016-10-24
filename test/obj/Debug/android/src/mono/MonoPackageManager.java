@@ -17,7 +17,7 @@ public class MonoPackageManager {
 	static Object lock = new Object ();
 	static boolean initialized;
 
-	static android.content.Context Context;
+	public static android.content.Context Context;
 
 	public static void LoadApplication (Context context, ApplicationInfo runtimePackage, String[] apks)
 	{
@@ -36,13 +36,13 @@ public class MonoPackageManager {
 				String language     = locale.getLanguage () + "-" + locale.getCountry ();
 				String filesDir     = context.getFilesDir ().getAbsolutePath ();
 				String cacheDir     = context.getCacheDir ().getAbsolutePath ();
-				String dataDir      = getNativeLibraryPath (context);
+				String dataDir      = context.getApplicationInfo ().dataDir + "/lib";
 				ClassLoader loader  = context.getClassLoader ();
 
 				Runtime.init (
 						language,
 						apks,
-						getNativeLibraryPath (runtimePackage),
+						runtimePackage.dataDir + "/lib",
 						new String[]{
 							filesDir,
 							cacheDir,
@@ -67,18 +67,6 @@ public class MonoPackageManager {
 		// Ignore; vestigial
 	}
 
-	static String getNativeLibraryPath (Context context)
-	{
-	    return getNativeLibraryPath (context.getApplicationInfo ());
-	}
-
-	static String getNativeLibraryPath (ApplicationInfo ainfo)
-	{
-		if (android.os.Build.VERSION.SDK_INT >= 9)
-			return ainfo.nativeLibraryDir;
-		return ainfo.dataDir + "/lib";
-	}
-
 	public static String[] getAssemblies ()
 	{
 		return MonoPackageManager_Resources.Assemblies;
@@ -101,19 +89,9 @@ class MonoPackageManager_Resources {
 		"test.dll",
 		"Java.Interop.dll",
 		"MonoGame.Framework.dll",
-		"System.Threading.dll",
-		"System.Runtime.dll",
-		"System.Collections.dll",
-		"System.Collections.Concurrent.dll",
-		"System.Diagnostics.Debug.dll",
-		"System.Reflection.dll",
-		"System.Linq.dll",
-		"System.Runtime.InteropServices.dll",
-		"System.Runtime.Extensions.dll",
-		"System.Reflection.Extensions.dll",
 		"System.ServiceModel.Internals.dll",
 	};
 	public static final String[] Dependencies = new String[]{
 	};
-	public static final String ApiPackageName = "Mono.Android.Platform.ApiLevel_23";
+	public static final String ApiPackageName = "Mono.Android.Platform.ApiLevel_19";
 }
